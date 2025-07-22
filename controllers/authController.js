@@ -45,6 +45,7 @@ exports.registerUser = async (req, res) => {
 };
 exports.loginUser = async (req, res, next) => {
   const { username, password } = req.body;
+  console.log("username", username);
   const userAgent = req.headers["user-agent"];
   const ip = req.ip;
   try {
