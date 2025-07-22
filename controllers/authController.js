@@ -1,7 +1,7 @@
 const User = require("../modal/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const generateUsername = require("../utils/generateUserName");
+const generateUsername = require("../utils/generate_username");
 const { MESSAGES } = require("../utils/constants");
 const sendEmail = require("../utils/mailService");
 
