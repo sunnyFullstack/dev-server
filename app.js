@@ -30,6 +30,9 @@ connectDB();
 
 app.use("/api/auth", authRoutes);
 app.use("/api/v1", adminRoutes);
+app.get("/fake", (req, res) => {
+  res.status(200).json({ message: "api working" });
+});
 
 app.use(errorHandler);
 
