@@ -41,9 +41,23 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       validate: [validator.isEmail, "Invalid email address"],
     },
+    teachercode: {
+      type: String,
+      trim: true,
+    },
+    classgroup: {
+      type: String,
+      trim: true,
+    },
+    subjectname: {
+      type: String,
+      trim: true,
+    },
     password: {
       type: String,
-      required: true,
+      required: function () {
+        return this.isNew; // Only required during creation
+      },
       minlength: 8,
       select: false,
     },
@@ -54,17 +68,18 @@ const userSchema = new mongoose.Schema(
     work_location: {
       state: {
         type: String,
-        // required: true,
         trim: true,
       },
       district: {
         type: String,
-        // required: true,
         trim: true,
       },
       block: {
         type: String,
-        // required: true,
+        trim: true,
+      },
+      village: {
+        type: String,
         trim: true,
       },
     },
@@ -81,11 +96,10 @@ const userSchema = new mongoose.Schema(
         type: String,
         trim: true,
       },
-    },
-    gender: {
-      type: String,
-      required: true,
-      trim: true,
+      village: {
+        type: String,
+        trim: true,
+      },
     },
     school_info: {
       school_name: {
@@ -93,10 +107,6 @@ const userSchema = new mongoose.Schema(
         trim: true,
       },
       school_u_dise: {
-        type: String,
-        trim: true,
-      },
-      address: {
         type: String,
         trim: true,
       },

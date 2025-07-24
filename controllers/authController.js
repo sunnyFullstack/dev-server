@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const generateUsername = require("../utils/generate_username");
 const { MESSAGES } = require("../utils/constants");
 const sendEmail = require("../utils/mailService");
+const decodeToken = require("../utils/decodeToken");
 
 exports.registerUser = async (req, res) => {
   try {
@@ -106,11 +107,8 @@ exports.logout = async (req, res, next) => {
   return res.status(200).json({ message: "Logged out successfully" });
 };
 exports.profilecheck = async (req, res, next) => {
-  const token = req.cookies.token;
-  if (!token) return res.sendStatus(401);
-
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = decodeToken(req, res, next);
     const username = decoded.username;
     const user = await User.findOne({ username }).select(
       "-password -profile_edit_count -login_count -login_history -lastLoginAt -__v"
@@ -118,5 +116,84 @@ exports.profilecheck = async (req, res, next) => {
     res.json({ user }); // send some basic info
   } catch (err) {
     res.sendStatus(401);
+  }
+};
+exports.profileEdit = async (req, res) => {
+  try {
+    const decoded = decodeToken(req, res);
+    const userId = decoded.id;
+
+    const {
+      firstname,
+      lastname,
+      mobile,
+      email,
+      gender,
+      schoolname,
+      schoolcode,
+      teachercode,
+      classgroup,
+      subjectname,
+      state,
+      district,
+      block,
+      village,
+      t_state,
+      t_district,
+      t_block,
+      t_village,
+      password,
+    } = req.body;
+
+    const updates = {
+      firstname,
+      lastname,
+      mobile,
+      email,
+      gender,
+      work_location: {
+        state,
+        district,
+        block,
+        village,
+      },
+      desired_transfer_location: {
+        state: t_state,
+        district: t_district,
+        block: t_block,
+        village: t_village,
+      },
+      school_info: {
+        school_name: schoolname,
+        school_u_dise: schoolcode,
+      },
+      teachercode,
+      classgroup,
+      subjectname,
+    };
+
+    // If password is given, hash it
+    if (password && password.trim() !== "") {
+      if (password.length < 8) {
+        return res
+          .status(400)
+          .json({ error: "Password must be at least 8 characters long." });
+      }
+      const hashedPassword = await bcrypt.hash(password, 10);
+      updates.password = hashedPassword;
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(userId, updates, {
+      new: true,
+    });
+
+    if (!updatedUser) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.status(200).json({ message: "Profile updated successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(400).json({ error: err.message });
   }
 };
