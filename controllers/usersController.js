@@ -7,7 +7,9 @@ exports.getUsers = async (req, res, next) => {
   console.log("call", decoded);
   try {
     const myId = decoded.id; // or req.user._id depending on how you store the ID
-    const otherUsers = await User.find({ _id: { $ne: myId } }); // $ne = not equal
+    const otherUsers = await User.find({ _id: { $ne: myId } }).select(
+      "-password -profile_edit_count -login_count -login_history -lastLoginAt -__v"
+    ); // $ne = not equal
     if (otherUsers.length > 0) {
       res.status(200).json({ msg: "list users", data: otherUsers });
     } else {

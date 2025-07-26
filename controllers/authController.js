@@ -113,7 +113,45 @@ exports.profilecheck = async (req, res, next) => {
     const user = await User.findOne({ username }).select(
       "-password -profile_edit_count -login_count -login_history -lastLoginAt -__v"
     );
-    res.json({ user }); // send some basic info
+    if (!user) return res.status(404).json({ message: "User not found" });
+    const requiredFields = [
+      "firstname",
+      "lastname",
+      "mobile",
+      "username",
+      "email",
+      "gender",
+      "work_location.state",
+      "work_location.district",
+      "work_location.block",
+      "work_location.village",
+      "desired_transfer_location.state",
+      "desired_transfer_location.district",
+      "desired_transfer_location.block",
+      "desired_transfer_location.village",
+      "school_info.school_name",
+      "school_info.school_u_dise",
+    ];
+    const missingFields = requiredFields.filter((path) => {
+      const keys = path.split(".");
+      let value = user;
+      for (const key of keys) {
+        value = value?.[key];
+        if (value === undefined || value === null || value === "") {
+          return true;
+        }
+      }
+      return false;
+    });
+    if (missingFields.length > 0) {
+      return res.status(200).json({
+        data: user,
+        missingFields: missingFields,
+        message: "profile isn't completed!",
+        isProfileComplete: false,
+      });
+    }
+    res.status(200).json({ data: user, message: "user found" }); // send some basic info
   } catch (err) {
     res.sendStatus(401);
   }
