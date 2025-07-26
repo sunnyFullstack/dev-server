@@ -38,7 +38,7 @@ exports.getyourMatch = async (req, res, next) => {
     }).select(
       "-password -profile_edit_count -login_count -login_history -lastLoginAt -__v"
     );
-    console.log(user, "+++++");
+    console.log(user, "+++++", req.body);
     // const otherUsers = await User.findAll({ _id: { $ne: myId } }).where();
     res.json({ message: "data is found", data: user });
   } catch (error) {

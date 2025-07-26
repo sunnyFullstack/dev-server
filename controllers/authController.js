@@ -46,7 +46,6 @@ exports.registerUser = async (req, res) => {
 };
 exports.loginUser = async (req, res, next) => {
   const { username, password } = req.body;
-  console.log("username", username);
   const userAgent = req.headers["user-agent"];
   const ip = req.ip;
   try {
@@ -111,8 +110,9 @@ exports.profilecheck = async (req, res, next) => {
     const decoded = decodeToken(req, res, next);
     const username = decoded.username;
     const user = await User.findOne({ username }).select(
-      "-password -profile_edit_count -login_count -login_history -lastLoginAt -__v"
+      "-password -profile_edit_count -login_count -login_history -lastLoginAt -__v -_id"
     );
+
     if (!user) return res.status(404).json({ message: "User not found" });
     const requiredFields = [
       "firstname",
@@ -121,6 +121,9 @@ exports.profilecheck = async (req, res, next) => {
       "username",
       "email",
       "gender",
+      "subjectname",
+      "school_info.school_name",
+      "school_info.school_u_dise",
       "work_location.state",
       "work_location.district",
       "work_location.block",
@@ -129,8 +132,6 @@ exports.profilecheck = async (req, res, next) => {
       "desired_transfer_location.district",
       "desired_transfer_location.block",
       "desired_transfer_location.village",
-      "school_info.school_name",
-      "school_info.school_u_dise",
     ];
     const missingFields = requiredFields.filter((path) => {
       const keys = path.split(".");
@@ -148,10 +149,12 @@ exports.profilecheck = async (req, res, next) => {
         data: user,
         missingFields: missingFields,
         message: "profile isn't completed!",
-        isProfileComplete: false,
+        isProfileComplete: true,
       });
     }
-    res.status(200).json({ data: user, message: "user found" }); // send some basic info
+    res
+      .status(200)
+      .json({ data: user, message: "user found", isProfileComplete: false }); // send some basic info
   } catch (err) {
     res.sendStatus(401);
   }

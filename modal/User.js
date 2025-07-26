@@ -123,10 +123,6 @@ const userSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
-    subject: {
-      type: String,
-      trim: true,
-    },
     profile_edit_count: {
       type: Number,
       default: 0,
